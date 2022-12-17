@@ -9,4 +9,21 @@ const findClients = async (query) => {
   }
 };
 
-module.exports = { findClients };
+const addClient = async (client) => {
+  try {
+    const newClient = await clientModel(client);
+    return newClient.save();
+  } catch (error) {
+    return error.message;
+  }
+};
+
+const deleteClient = async (id) => {
+  try {
+    return await clientModel.findByIdAndRemove(id);
+  } catch (error) {
+    return error.message;
+  }
+};
+
+module.exports = { findClients, addClient, deleteClient };

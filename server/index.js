@@ -11,6 +11,9 @@ const app = express();
 
 //Connect to database
 dbConfig();
+app.get("/", (req, res) => {
+  res.status(200).send("Working");
+});
 
 app.use(
   "/graphql",

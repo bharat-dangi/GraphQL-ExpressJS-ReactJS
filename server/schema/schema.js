@@ -8,6 +8,7 @@ const {
   GraphQLEnumType,
 } = require("graphql");
 const clientModel = require("../models/client.model");
+const projectModel = require("../models/project.model");
 const {
   findClients,
   addClient,
@@ -55,28 +56,30 @@ const RootQuery = new GraphQLObjectType({
   fields: {
     projects: {
       type: new GraphQLList(ProjectType),
-      resolve(parent, args) {
-        return findProjects({});
+      async resolve(parent, args) {
+        return await findProjects({});
       },
     },
     project: {
       type: ProjectType,
       args: { id: { type: GraphQLID } },
-      resolve(parent, args) {
-        return findProjects({ _id: args.id });
+      async resolve(parent, args) {
+        const fetchedProject = await findProjects({ _id: args.id });
+        return fetchedProject[0];
       },
     },
     clients: {
       type: new GraphQLList(ClientType),
-      resolve(parent, args) {
-        return findClients({});
+      async resolve(parent, args) {
+        return await findClients({});
       },
     },
     client: {
       type: ClientType,
       args: { id: { type: GraphQLID } },
-      resolve(parent, args) {
-        return findClients({ _id: args.id });
+      async resolve(parent, args) {
+        const fetchedClient = await findClients({ _id: args.id });
+        return fetchedClient[0];
       },
     },
   },
@@ -109,8 +112,13 @@ const mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLNonNull(GraphQLID) },
       },
-      resolve(parent, args) {
-        return deleteClient(args.id);
+      async resolve(parent, args) {
+        projectModel.find({ clientId: args.id }).then((projects) => {
+          projects.forEach((project) => {
+            project.remove();
+          });
+        });
+        return await deleteClient(args.id);
       },
     },
 
